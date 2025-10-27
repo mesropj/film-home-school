@@ -1,98 +1,372 @@
-/* Reset and Base Styles */
+/**
+ * film(home)school - Stylesheet
+ * Design Philosophy: "How would Apple do it?"
+ * - Clean, minimal, and elegant
+ * - Thoughtful use of space and typography
+ * - Subtle animations and transitions
+ * - Focus on content and readability
+ * - Polished interactions and attention to detail
+ */
+
+/* ============================================
+   CSS RESET & BASE STYLES
+   ============================================ */
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* ============================================
+   CSS VARIABLES - DARK MODE (Default)
+   ============================================ */
+
 :root {
-    --primary-color: #1a1a1a;
-    --secondary-color: #f4f4f4;
-    --accent-color: #e50914;
-    --text-color: #333;
-    --text-light: #666;
-    --border-radius: 8px;
-    --transition: all 0.3s ease;
+    /* Colors - Dark Mode */
+    --bg-primary: #000000;
+    --bg-secondary: #1c1c1e;
+    --bg-tertiary: #2c2c2e;
+    --bg-elevated: #3a3a3c;
+    
+    --text-primary: #ffffff;
+    --text-secondary: #ebebf5;
+    --text-tertiary: #98989f;
+    
+    --accent-primary: #0a84ff;
+    --accent-hover: #409cff;
+    --accent-active: #0066cc;
+    
+    --border-color: rgba(255, 255, 255, 0.1);
+    --divider-color: rgba(255, 255, 255, 0.08);
+    
+    --glossary-color: #ffd60a;
+    --glossary-underline: rgba(255, 214, 10, 0.4);
+    
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+    
+    /* Typography */
+    --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+    
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+    --spacing-2xl: 4rem;
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    
+    /* Transitions */
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   LIGHT MODE
+   ============================================ */
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f5f5f7;
+        --bg-tertiary: #e8e8ed;
+        --bg-elevated: #ffffff;
+        
+        --text-primary: #1d1d1f;
+        --text-secondary: #3a3a3c;
+        --text-tertiary: #86868b;
+        
+        --accent-primary: #007aff;
+        --accent-hover: #0051d5;
+        --accent-active: #003d99;
+        
+        --border-color: rgba(0, 0, 0, 0.08);
+        --divider-color: rgba(0, 0, 0, 0.05);
+        
+        --glossary-color: #f5a623;
+        --glossary-underline: rgba(245, 166, 35, 0.3);
+        
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+        --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.16);
+    }
+}
+
+/* ============================================
+   BASE ELEMENTS
+   ============================================ */
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--font-system);
     line-height: 1.6;
-    color: var(--text-color);
-    background-color: var(--secondary-color);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    font-size: 1rem;
 }
 
-/* Container */
+/* ============================================
+   LAYOUT
+   ============================================ */
+
 #app {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-/* Header Styles */
+/* ============================================
+   HEADER
+   ============================================ */
+
 header {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 2rem 1rem;
+    background-color: var(--bg-secondary);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
+    padding: var(--spacing-xl) var(--spacing-md);
     text-align: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    color: white;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-primary);
 }
 
 header p {
-    font-size: 1.1rem;
-    color: var(--secondary-color);
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: var(--text-secondary);
+    font-weight: 400;
 }
 
-/* Main Content */
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+
 main {
     flex: 1;
-    max-width: 1200px;
+    max-width: 980px;
     width: 100%;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: var(--spacing-2xl) var(--spacing-md);
 }
 
 .content {
-    background: white;
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: var(--bg-secondary);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    line-height: 1.7;
+    font-size: 1.0625rem;
 }
 
-/* Footer Styles */
+.content p {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-secondary);
+}
+
+.content p:last-child {
+    margin-bottom: 0;
+}
+
+/* ============================================
+   GLOSSARY TERMS
+   ============================================ */
+
+.glossary-term {
+    color: var(--glossary-color);
+    text-decoration: none;
+    border-bottom: 1.5px dotted var(--glossary-underline);
+    cursor: help;
+    position: relative;
+    transition: all var(--transition-fast);
+    padding-bottom: 1px;
+}
+
+.glossary-term:hover {
+    color: var(--glossary-color);
+    border-bottom-color: var(--glossary-color);
+    border-bottom-style: solid;
+}
+
+/* Glossary Tooltip */
+.glossary-tooltip {
+    position: absolute;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    max-width: 320px;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity var(--transition-base), transform var(--transition-base);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.glossary-tooltip.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.glossary-tooltip::before {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 20px;
+    width: 12px;
+    height: 12px;
+    background: var(--bg-elevated);
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    transform: rotate(45deg);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+
 footer {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
     text-align: center;
-    padding: 1.5rem 1rem;
+    padding: var(--spacing-lg) var(--spacing-md);
     margin-top: auto;
 }
 
 footer p {
-    color: var(--secondary-color);
+    color: var(--text-tertiary);
+    font-size: 0.875rem;
+    font-weight: 400;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    header h1 {
-        font-size: 2rem;
-    }
+/* ============================================
+   LINKS
+   ============================================ */
 
-    header p {
+a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+a:active {
+    color: var(--accent-active);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+    header {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+    
+    main {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+    
+    .content {
+        padding: var(--spacing-md);
         font-size: 1rem;
     }
+    
+    .glossary-tooltip {
+        max-width: 280px;
+        font-size: 0.875rem;
+    }
+}
 
+@media (max-width: 480px) {
+    header {
+        padding: var(--spacing-md) var(--spacing-sm);
+    }
+    
     main {
-        padding: 1rem;
+        padding: var(--spacing-md) var(--spacing-sm);
     }
-
+    
     .content {
-        padding: 1.5rem;
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-md);
     }
+    
+    .glossary-tooltip {
+        max-width: calc(100vw - 2rem);
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus styles for keyboard navigation */
+:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.text-center {
+    text-align: center;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
 }
