@@ -529,6 +529,8 @@ footer p {
     color: var(--secondary-text);
     font-size: 0.875rem;
     font-weight: 400;
+    margin: 0;
+    line-height: 1.5;
 }
 
 /* ============================================
@@ -626,23 +628,32 @@ a:active {
 
 /* Skip to content link for keyboard navigation */
 .skip-to-content {
-    position: fixed;
-    top: -100px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
     background: var(--accent-color);
     color: #ffffff;
     padding: 0.75rem 1.5rem;
     text-decoration: none;
     font-weight: 600;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     z-index: 10000;
-    transition: top 0.3s ease;
+    transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    font-size: 0.9375rem;
 }
 
 .skip-to-content:focus {
+    position: fixed;
+    left: 50%;
     top: 1rem;
+    transform: translateX(-50%);
+    width: auto;
+    height: auto;
+    overflow: visible;
     outline: 3px solid var(--accent-hover);
     outline-offset: 2px;
 }
