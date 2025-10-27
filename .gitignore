@@ -8,6 +8,7 @@ yarn-error.log*
 dist/
 build/
 *.local
+local_files/
 
 # OS files
 .DS_Store
