@@ -98,10 +98,10 @@ async function loadGlossary() {
     try {
         console.log('Attempting to fetch glossary from Supabase...');
         
-        // Fetch term and definition columns from the glossary table, ordered alphabetically
+        // Fetch term, definition, and wikipedia_url columns from the glossary table
         const { data, error } = await supabase
             .from('glossary')
-            .select('term, definition')
+            .select('term, definition, wikipedia_url')
             .order('term', { ascending: true });
 
         if (error) {
@@ -121,11 +121,14 @@ async function loadGlossary() {
         // Create a new Map to store the glossary
         const glossaryMap = new Map();
 
-        // Populate the Map with term as key and definition as value
+        // Populate the Map with term as key and object with definition and wikipedia_url as value
         if (data && data.length > 0) {
             data.forEach(entry => {
                 if (entry.term && entry.definition) {
-                    glossaryMap.set(entry.term, entry.definition);
+                    glossaryMap.set(entry.term, {
+                        definition: entry.definition,
+                        wikipedia_url: entry.wikipedia_url || null
+                    });
                 }
             });
         }
@@ -143,7 +146,7 @@ async function loadGlossary() {
 
 /**
  * Load glossary from local CSV file as fallback
- * @returns {Promise<Map>} - A Map with terms as keys and definitions as values
+ * @returns {Promise<Map>} - A Map with terms as keys and objects with definition and wikipedia_url
  */
 async function loadGlossaryFromCSV() {
     try {
@@ -157,26 +160,35 @@ async function loadGlossaryFromCSV() {
         const lines = csvText.split('\n');
         const glossaryMap = new Map();
         
-        // Skip header row
+        // Parse header to find column indices
+        const header = lines[0].toLowerCase().split(',');
+        const termIndex = header.indexOf('term');
+        const definitionIndex = header.indexOf('definition');
+        const wikiIndex = header.findIndex(col => col.includes('wiki'));
+        
+        // Skip header row, start from line 1
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
             
-            // Parse CSV line (handling quoted fields with commas)
-            const match = line.match(/^"?([^"]+)"?,(.+)$/);
-            if (match) {
-                const term = match[1].trim();
-                let definition = match[2].trim();
+            // Simple CSV parsing (note: this won't handle commas within quoted fields perfectly)
+            // For production, consider using a proper CSV parser library
+            const values = line.split(',');
+            
+            if (values.length > definitionIndex) {
+                const term = values[termIndex]?.replace(/^"|"$/g, '').trim();
+                let definition = values[definitionIndex]?.replace(/^"|"$/g, '').trim();
+                const wikipedia_url = wikiIndex >= 0 ? values[wikiIndex]?.replace(/^"|"$/g, '').trim() : null;
                 
-                // Remove surrounding quotes if present
-                if (definition.startsWith('"') && definition.endsWith('"')) {
-                    definition = definition.slice(1, -1);
+                if (term && definition) {
+                    // Clean up escaped quotes
+                    definition = definition.replace(/""/g, '"');
+                    
+                    glossaryMap.set(term, {
+                        definition: definition,
+                        wikipedia_url: wikipedia_url || null
+                    });
                 }
-                
-                // Clean up escaped quotes
-                definition = definition.replace(/""/g, '"');
-                
-                glossaryMap.set(term, definition);
             }
         }
         
@@ -251,7 +263,7 @@ function highlightInElement(element, terms) {
         const matches = [];
 
         // Find all term matches in this text node
-        terms.forEach(([term, definition]) => {
+        terms.forEach(([term, data]) => {
             // Escape special regex characters in the term
             const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             
@@ -264,7 +276,8 @@ function highlightInElement(element, terms) {
                     start: match.index,
                     end: match.index + match[0].length,
                     text: match[0], // Preserve original capitalization from the text
-                    definition: definition,
+                    definition: typeof data === 'string' ? data : data.definition,
+                    wikipedia_url: typeof data === 'object' ? data.wikipedia_url : null,
                     term: term
                 });
             }
@@ -300,6 +313,9 @@ function highlightInElement(element, terms) {
                 const span = document.createElement('span');
                 span.className = 'glossary-term';
                 span.setAttribute('data-definition', match.definition);
+                if (match.wikipedia_url) {
+                    span.setAttribute('data-wikipedia-url', match.wikipedia_url);
+                }
                 span.textContent = match.text; // Use the actual text from the document (preserves capitalization)
                 fragment.appendChild(span);
 
@@ -329,24 +345,66 @@ function initializeGlossaryTooltips() {
     document.body.appendChild(tooltip);
 
     let currentTerm = null; // Track the currently active term for mobile
+    let hideTimeout = null; // Timeout for delayed hiding
+
+    /**
+     * Build tooltip content with definition and optional Wikipedia link
+     */
+    function buildTooltipContent(definition, wikipediaUrl) {
+        tooltip.innerHTML = ''; // Clear existing content
+        
+        // Add definition text
+        const defText = document.createElement('p');
+        defText.className = 'tooltip-definition';
+        defText.textContent = definition;
+        tooltip.appendChild(defText);
+        
+        // Add Wikipedia link if available
+        if (wikipediaUrl) {
+            const wikiLink = document.createElement('a');
+            wikiLink.href = wikipediaUrl;
+            wikiLink.target = '_blank';
+            wikiLink.rel = 'noopener noreferrer';
+            wikiLink.className = 'tooltip-wiki-link';
+            
+            // Wikipedia logo using external SVG file
+            wikiLink.innerHTML = `
+                <span class="wiki-icon-container">
+                    <img src="/images/misc/Wikipedia's_W.svg" alt="Wikipedia" class="wiki-icon">
+                </span>
+                <span>Read more on Wikipedia</span>
+            `;
+            
+            tooltip.appendChild(wikiLink);
+        }
+    }
 
     // Desktop: Mouseover event listener
     document.addEventListener('mouseover', (event) => {
         const term = event.target.closest('.glossary-term');
         
         if (term) {
-            // Get the definition from the data attribute
+            // Clear any pending hide timeout
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
+            
             const definition = term.getAttribute('data-definition');
+            const wikipediaUrl = term.getAttribute('data-wikipedia-url');
             
             if (definition) {
-                // Set the tooltip content
-                tooltip.textContent = definition;
-                
-                // Position the tooltip near the cursor
+                buildTooltipContent(definition, wikipediaUrl);
                 positionTooltip(tooltip, term);
-                
-                // Show the tooltip
                 tooltip.classList.add('show');
+            }
+        }
+        
+        // Also check if hovering over tooltip itself - keep it visible
+        if (event.target.closest('.glossary-tooltip')) {
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
             }
         }
     });
@@ -356,8 +414,26 @@ function initializeGlossaryTooltips() {
         const term = event.target.closest('.glossary-term');
         
         if (term) {
-            // Hide the tooltip
-            tooltip.classList.remove('show');
+            // Clear any existing timeout
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+            }
+            
+            // Set a delay before hiding (300ms gives time to move cursor to tooltip)
+            hideTimeout = setTimeout(() => {
+                tooltip.classList.remove('show');
+            }, 300);
+        }
+        
+        // If leaving the tooltip, hide it with delay
+        if (event.target.closest('.glossary-tooltip')) {
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+            }
+            
+            hideTimeout = setTimeout(() => {
+                tooltip.classList.remove('show');
+            }, 300);
         }
     });
 
@@ -365,20 +441,23 @@ function initializeGlossaryTooltips() {
     document.addEventListener('click', (event) => {
         const term = event.target.closest('.glossary-term');
         
+        // Don't close tooltip if clicking the Wikipedia link
+        if (event.target.closest('.tooltip-wiki-link')) {
+            return;
+        }
+        
         if (term) {
-            // User clicked a glossary term
             event.preventDefault();
             
-            // If clicking the same term, toggle it off
             if (currentTerm === term && tooltip.classList.contains('show')) {
                 tooltip.classList.remove('show');
                 currentTerm = null;
             } else {
-                // Show tooltip for this term
                 const definition = term.getAttribute('data-definition');
+                const wikipediaUrl = term.getAttribute('data-wikipedia-url');
                 
                 if (definition) {
-                    tooltip.textContent = definition;
+                    buildTooltipContent(definition, wikipediaUrl);
                     positionTooltip(tooltip, term);
                     tooltip.classList.add('show');
                     currentTerm = term;

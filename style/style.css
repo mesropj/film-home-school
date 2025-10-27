@@ -472,6 +472,7 @@ main {
     color: var(--glossary-color);
     border-bottom-color: var(--glossary-color);
     border-bottom-style: solid;
+    text-decoration: none;
 }
 
 /* Glossary Tooltip */
@@ -480,12 +481,10 @@ main {
     background: var(--card-background);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-md);
     box-shadow: var(--shadow-lg);
     z-index: 1000;
     max-width: 320px;
-    font-size: 0.9375rem;
-    line-height: 1.5;
     color: var(--primary-text);
     pointer-events: none;
     opacity: 0;
@@ -498,6 +497,128 @@ main {
 .glossary-tooltip.show {
     opacity: 1;
     transform: translateY(0);
+    pointer-events: auto;
+}
+
+.tooltip-definition {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--primary-text);
+    font-weight: 400;
+}
+
+/* Wikipedia Link in Tooltip */
+.tooltip-wiki-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.625rem 1rem;
+    margin-top: 0.875rem;
+    background: linear-gradient(135deg, rgba(0, 113, 227, 0.08) 0%, rgba(0, 113, 227, 0.04) 100%);
+    border: 1.5px solid rgba(0, 113, 227, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.tooltip-wiki-link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+    opacity: 0;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tooltip-wiki-link:hover {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #0056b3 100%);
+    border-color: var(--accent-color);
+    color: #ffffff;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 113, 227, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tooltip-wiki-link:hover::before {
+    opacity: 1;
+}
+
+.tooltip-wiki-link:active {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.25);
+}
+
+/* Dark Mode Styles */
+[data-theme="dark"] .tooltip-wiki-link {
+    background: linear-gradient(135deg, rgba(41, 151, 255, 0.12) 0%, rgba(41, 151, 255, 0.06) 100%);
+    border-color: rgba(41, 151, 255, 0.3);
+    color: #5ca3ff;
+}
+
+[data-theme="dark"] .tooltip-wiki-link:hover {
+    background: linear-gradient(135deg, #2997ff 0%, #0071e3 100%);
+    border-color: #2997ff;
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(41, 151, 255, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .tooltip-wiki-link:active {
+    box-shadow: 0 2px 8px rgba(41, 151, 255, 0.35);
+}
+
+/* Wikipedia Icon Container */
+.wiki-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 3px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .wiki-icon-container {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.tooltip-wiki-link:hover .wiki-icon-container {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .tooltip-wiki-link:hover .wiki-icon-container {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.wiki-icon {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+    filter: none;
+    transition: filter 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tooltip-wiki-link > span:last-child {
+    line-height: 1.2;
+    position: relative;
+    z-index: 1;
 }
 
 .glossary-tooltip::before {
