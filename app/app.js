@@ -35,7 +35,7 @@ async function init() {
     
     // Highlight glossary terms in the main content
     if (glossaryMap.size > 0) {
-        highlightGlossaryTerms('.content', glossaryMap);
+        highlightGlossaryTerms('.main-content', glossaryMap);
         
         // Initialize tooltip functionality
         initializeGlossaryTooltips();
